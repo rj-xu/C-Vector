@@ -1,5 +1,89 @@
 #include "util_math.h"
 
+int UtilNumConv(struct Number *num, const char *str)
+{
+    // For example:
+    // "100": INT = 100
+    // "1e2": DBL = 100.000000
+    // "0.01": DBL = 0.010000
+    // "1e-2": DBL = 0.010000
+    // "": ERROR: strlen = 0
+    // "2147483648": ERROR: out of range
+    // "1.8E+308": ERROR: out of range
+    // "1ee2": ERROR: illegal
+
+    num->type = NUM_TYPE_ERR;
+    num->value.i = 0;
+
+    if (strlen(str) == 0)
+    {
+        num->type = NUM_TYPE_ERR;
+        return UTIL_FAIL;
+    }
+
+    if (!strcmp("+oo", str))
+    {
+        num->type = NUM_TYPE_P_INF;
+        return UTIL_PASS;
+    }
+
+    if (!strcmp("-oo", str))
+    {
+        num->type = NUM_TYPE_N_INF;
+        return UTIL_PASS;
+    }
+
+    char *intEnd = NULL;
+    int intRs = strtol(str, &intEnd, 0);
+    if (errno != 0)
+    {
+        num->type = NUM_TYPE_ERR;
+        return UTIL_FAIL;
+    }
+    if (*intEnd == '\0')
+    {
+        num->type = NUM_TYPE_INT;
+        num->value.i = intRs;
+        return UTIL_PASS;
+    }
+
+    char *dblEnd = NULL;
+    double dblRs = strtod(str, &dblEnd);
+    if (errno != 0)
+    {
+        num->type = NUM_TYPE_ERR;
+        return UTIL_FAIL;
+    }
+    if (*dblEnd == '\0')
+    {
+        num->type = NUM_TYPE_DBL;
+        num->value.d = dblRs;
+        return UTIL_PASS;
+    }
+
+    return UTIL_FAIL;
+}
+
+const char *UtilNumDump(char *str, const struct Number *num)
+{
+
+    switch (num->type)
+    {
+    case NUM_TYPE_INT:
+        sprintf(str, "%d", num->value.i);
+        return str;
+    case NUM_TYPE_DBL:
+        sprintf(str, "%f", num->value.d);
+        return str;
+    case NUM_TYPE_N_INF:
+        return "-oo";
+    case NUM_TYPE_P_INF:
+        return "+oo";
+    default:
+        return "NUMBER TYPE ERROR";
+    }
+}
+
 // clang-format off
 bool UtilMathIntIntGt  (int a, int b){ return (a >  b); }
 bool UtilMathIntIntGtEq(int a, int b){ return (a >= b); }
