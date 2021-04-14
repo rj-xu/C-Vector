@@ -2,7 +2,29 @@
 
 #include "util_define.h"
 
+enum NumType
+{
+    NUM_TYPE_ERR = -1,
+    NUM_TYPE_INT,
+    NUM_TYPE_DBL,
+    NUM_TYPE_N_INF,
+    NUM_TYPE_P_INF,
+};
+
+struct Number
+{
+    enum NumType type;
+    union
+    {
+        int i;
+        double d;
+    } value;
+};
+
 #define UTIL_MATH_ESP (1e-6)
+
+extern int UtilNumConv(struct Number *num, const char *str);
+extern const char *UtilNumDump(char *str, const struct Number *num);
 
 // clang-format off
 extern bool UtilMathIntIntGt  (int a, int b);
